@@ -138,6 +138,8 @@ println!("{}", f64::sqrt(2.0));
 
 // Rust performs almost no numeric conversions implicitly. If a function expects an f64 argument, it's an error to pass an i32 value as the argument. Rust won't even implicitly convert an i16 value to an i32 value even though every i16 value is also an i32 value. The key word here is implicitly: we can always write out explicit conversions using the as operator; i as f64, or x as i32. We expand on conversions in Type Casts later on.
 
+
+
 // The bool Type
 
 // Rust's Boolean type, bool, has the usual two values for such types, true, and false. Comparison operators like == and < produce bool results.
@@ -151,3 +153,37 @@ assert_eq!(true as i32, 1);
 
 // Although a bool only needs a single bit to represent it, Rust uses an entire byte for a bool value in memory, so we can create a pointer to it.
 
+
+
+// Characters
+
+// Rust's character type char represents a single Unicode character, as a 32-bit value.
+
+// Rust uses the char type for single characters in isolation, but uses the UTF-8 encoding for strings and streams of text. So, a String represents its text as a sequence of UTF-8 bytes, not as an array of characters.
+
+// Character literals are characters enclosed in single quotes, like '8', or '!'. We can use any Unicode character we want.
+
+// As with byte literals, backslash escapes are required for a few characters:
+// Character       Rust character literal
+// Single quote,'  '\''
+// Backslash, \    '\\'
+// Newline         '\n'
+// Carriage return '\r'
+// Tab             '\t'
+
+// If we prefer, we can write out a character's Unicode code point in hexadecimal.
+// See page 87 for more details on hexadecimal examples.
+
+// Rust never implicitly converts between char and any other type. We can use the as conversion operator to convert a char to an integer type. For types smaller than 32 bits, the upper bits of the character's value are truncated:
+assert_eq!('*' as i32, 42);
+assert_eq!('ಠ' as u16, 0xca0);
+assert_eq!('ಠ' as i8, -0x60); // U+0CA0 truncated to eight bits, signed
+
+// Going in the other direction, u8 is the only type the as operator will convert to char. Rust intends the as operator to perform only cheap, infallible conversions, but every integer type other than u8 includes values that are not permitted Unicode code points so those conversions would require runtime checks.
+// Instead, the standard library function std::char::from_u32 takes any u32 value and returns an Option<char>: if the u32 is not a permitted Unicode code point, then from_u32 returns None; otherwise, it returns Some(c), where c is the char result.
+// Examples:
+assert_eq!('*'.is_alphabetic(), false);
+assert_eq!('β'.is_alphabetic(), true);
+assert_eq!('8'.to_digit(10), Some(8));
+assert_eq!('ಠ'.len_utf8(), 3);
+assert_eq!(std::char::from_digit(2, 10), Some('2'));
