@@ -137,3 +137,17 @@ println!("{}", (2.0_f64.sqrt()));
 println!("{}", f64::sqrt(2.0));
 
 // Rust performs almost no numeric conversions implicitly. If a function expects an f64 argument, it's an error to pass an i32 value as the argument. Rust won't even implicitly convert an i16 value to an i32 value even though every i16 value is also an i32 value. The key word here is implicitly: we can always write out explicit conversions using the as operator; i as f64, or x as i32. We expand on conversions in Type Casts later on.
+
+// The bool Type
+
+// Rust's Boolean type, bool, has the usual two values for such types, true, and false. Comparison operators like == and < produce bool results.
+
+// Unlike Python that permits strings, list, dics, and even sets in Boolean contexts, Rust is very strict. Control structures like if and while require their conditions to be bool expressions, as do the short-circuiting logical operators && and ||. We must write if x!=0{...}, not simply if x{...}.
+
+// Rust's as operator can convert bool values to integer types:
+assert_eq!(false as i32, 0);
+assert_eq!(true as i32, 1);
+// 'as' however, won't convert in the other direction, from numeric types to bool. Instead we must write out an explicit comparison like x != 0.
+
+// Although a bool only needs a single bit to represent it, Rust uses an entire byte for a bool value in memory, so we can create a pointer to it.
+
