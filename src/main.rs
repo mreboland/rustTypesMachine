@@ -71,3 +71,69 @@ fn main() {
 // Newline             b'\n'           10u8
 // Carriage return     b'\r'           13u8
 // Tab                 b'\t'           9u8
+
+// For characters that are hard to read or write, we can write their code in a hexadecimal instead. A byte literal of the form b'\xHH', where HH is any two-digit hexadecimal number, represents the byte whose value is HH. For example, you can write a byte literal for the ASCII “escape” control character as b'\x1b', since the ASCII code for “escape” is 27, or 1B in hexadecimal. It probably makes sense to use b'\x1b' instead of simply 27 only when you want to emphasize that the value represents an ASCII code.
+
+// We can covert from on integer type to another using the as operator. It's further explained later on but here's a few examples:
+
+assert_eq!( 10_i8 as u16, 10_u16); // in range
+assert_eq!( 2525_u16 as i16, 2525_i16); // in range 
+assert_eq!( -1_i16 as i32, -1_i32); // sign-extended
+assert_eq!(65535_u16 as i32, 65535_i32); // zero-extended
+
+// Conversions that are out of range for the destination
+// produce values that are equivalent to the original modulo 2^N,
+// where N is the width of the destination in bits. This
+// is sometimes called "truncation".
+assert_eq!( 1000_i16 as u8, 232_u8);
+assert_eq!(65535_u32 as i16, -1_i16);
+assert_eq!( -1_i8 as u8, 255_u8);
+assert_eq!( 255_u8 as i8, -1_i8);
+
+// Like any other sort of value, integers can have methods. For example:
+assert_eq!(2u16.pow(4), 16); // exponentiation
+assert_eq!((-4i32).abs(), 4); // absolute value
+assert_eq!(0b101101u8.count_ones(), 4); // population count
+// The type suffixes on the literals are required here. Rust can't look up a value's methods until it knows its type. In real code, there's usually additional context to disambiguate the type, so the suffixes aren't needed.
+
+
+// Floating-Point Types
+
+// Rust provides IEEE single and double precision floating-point types. These types include positive and negative infinities, distinct positive and negative zero values, and a not-a-number value:
+// Type    Precision                                           Range
+// f32     IEEE single precision (at least 6 decimal digits)   Roughly –3.4 × 10^38 to +3.4 × 10^38
+// f64     IEEE double precision (at least 15 decimal digits)  Roughly –1.8 × 10^308 to +1.8 × 10^308
+
+// 31415 (integer part) .926 (fractional part) e-4 (exponent) f64(type suffix)
+// Every part of a floating-point number after the integer part is optional, but at least one of the fractional part, exponent, or type suffix must be present, to distinguish it from an integer literal. The fractional part may consist of a lone decimal point, so 5. is a valid gloating-point constant.
+// If lacking a type suffix, Rust infers whether it's an f32 or f64 from the context, defaulting to f64 if both are possible.
+
+// For the purposes of type inference, Rust treats integer literals and floating-point literals as distinct classes. It will never infer a floating-point type for an integer literal, or vice versa.
+// Examples:
+// Literal             Type        Mathematical value
+// –1.5625             Inferred    −(1 ⁄ )
+// 2.                  Inferred    2
+// 0.25                Inferred    1/4
+// 1e4                 Inferred    10,000
+// 40f32               f32         40
+// 9.109_383_56e-31f64 f64         Roughly 9.10938356 × 10
+
+// The standard library’s std::f32 and std::f64 modules define constants for the IEEE-required special values like INFINITY, NEG_INFINITY (negative infinity), NAN (the not-a-number value), and MIN and MAX (the largest and smallest finite values). The std::f32::consts and std::f64::consts modules provide various commonly used mathematical constants like E, PI, and the square root of two.
+
+// The f32 and f64 types provide a full complement of methods for mathematical calculations; for example, 2f64.sqrt() is the double precision square root of two.
+// Examples:
+assert_eq!(5f32.sqrt() * 5f32.sqrt(), 5.); // exactly 5.0, per IEEE
+assert_eq!(-1.01f64.floor(), -1.0);
+assert!((-1. / std::f32::INFINITY).is_sign_negative());
+
+// As before, we don't usually need to write of the suffixes in real code because of context. When it doesn't, we get an error message. Example:
+println!("{}", (2.0).sqrt());
+
+// Rust complains:
+// Error: no method named `sqrt` found for type `{float}` in the current scope
+
+// It's an odd message as a floating-point type should be able to use a sqrt method. The issue above is that we didn't indicate a type one way or another:
+println!("{}", (2.0_f64.sqrt()));
+println!("{}", f64::sqrt(2.0));
+
+// Rust performs almost no numeric conversions implicitly. If a function expects an f64 argument, it's an error to pass an i32 value as the argument. Rust won't even implicitly convert an i16 value to an i32 value even though every i16 value is also an i32 value. The key word here is implicitly: we can always write out explicit conversions using the as operator; i as f64, or x as i32. We expand on conversions in Type Casts later on.
